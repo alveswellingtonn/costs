@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import './Projects.css'
 
-import Message from '../layout/Message'
-import Container from '../layout/Container'
+import Message from '../layout/Message';
+import Container from '../layout/Container';
+import Loading from '../layout/Loading';
 import LinkButton from '../layout/LinkButton';
 import ProjectCard from '../project/ProjectCard';
 
@@ -11,6 +12,8 @@ import { useLocation } from 'react-router-dom'
 function Projects() {
 
   const [projects, setProjects] = useState([]);
+  //estado do loading
+  const [removeloading, setRemoveLoading] = useState(false);
 
   const location = useLocation();
   let message = '';
@@ -19,17 +22,19 @@ function Projects() {
   }
 
   useEffect(() => {
-    fetch('http://localhost:5000/projects', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      }
-    }).then(resp => resp.json())
-      .then(data => {
-        console.log(data)
-        setProjects(data)
-      })
-      .catch(err => console.log(err))
+    setTimeout(() => {
+      fetch('http://localhost:5000/projects', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      }).then(resp => resp.json())
+        .then(data => {
+          setProjects(data)
+          setRemoveLoading(true)
+        })
+        .catch(err => console.log(err))
+    },600)
   }, []);
 
   return (
@@ -41,7 +46,7 @@ function Projects() {
       {message && <Message type="success" msg={message} />}
       <Container customClass="start" >
         {projects.length > 0 &&
-          projects.map((project) =>
+          projects.map((project) => (
             <ProjectCard
               id={project.id}
               name={project.name}
@@ -49,7 +54,11 @@ function Projects() {
               category={project.category.name}
               key={project.id}
             />
-          )}
+          ))}
+        {!removeloading && <Loading />}
+        {removeloading && projects.length === 0 && (
+          <p>Não há projetos cadastrados!</p>
+        )}
       </Container>
 
     </div>
