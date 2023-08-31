@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import './Project.css'
 import Loading from '../layout/Loading'
 import Container from '../layout/Container'
+import ProjectForm from '../project/ProjectForm'
 
 import { useParams } from 'react-router-dom'
 
@@ -9,7 +10,7 @@ function Project() {
 
     const { id } = useParams();
     const [project, setProject] = useState([]);
-    const [showProjectForm, setProjectForm] = useState(false);
+    const [showProjectForm, setShowProjectForm] = useState(false);
 
     useEffect(() => {
         setTimeout(() => {
@@ -26,8 +27,30 @@ function Project() {
         }, 3000)
     }, [id]);
 
+    function editPost(project) {
+        // budget validation
+        if(project.budget < project.cost) {
+            //mensagem
+        }
+
+        fetch(`http://localhost:5000/projects/${project.id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(project),
+        })
+        .then((resp) => resp.json())
+        .then((data) => {
+            setProject(data)
+            setShowProjectForm(false)
+            //mensagem
+        })
+        .catch(err => console.log(err))
+    }
+
     function toggleProjectForm() {
-        setProjectForm(!showProjectForm)
+        setShowProjectForm(!showProjectForm)
     }
 
     return (
@@ -54,7 +77,7 @@ function Project() {
                                 </div>
                             ) : (
                                 <div className='project-info'>
-                                    <p>form</p>
+                                    <ProjectForm  handleSubmit={editPost} btnText='Concluir edição' projectData={project} />
                                 </div>
                             )}
                         </div>
