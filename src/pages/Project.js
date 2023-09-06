@@ -1,4 +1,4 @@
-import {parse, v4 as uuidv4} from 'uuid'
+import { parse, v4 as uuidv4 } from 'uuid'
 import React, { useState, useEffect } from 'react'
 import './Project.css'
 import Loading from '../layout/Loading'
@@ -6,6 +6,7 @@ import Container from '../layout/Container'
 import Message from '../layout/Message'
 import ProjectForm from '../project/ProjectForm'
 import ServiceForm from '../service/ServiceForm'
+import ServiceCard from '../service/ServiceCard'
 
 import { useParams } from 'react-router-dom'
 
@@ -13,6 +14,7 @@ function Project() {
 
     const { id } = useParams();
     const [project, setProject] = useState([]);
+    const [services, setServices] = useState([]);
     const [showProjectForm, setShowProjectForm] = useState(false);
     const [showServiceForm, setShowServiceForm] = useState(false);
     const [message, setMessage] = useState();
@@ -28,6 +30,7 @@ function Project() {
             }).then((resp) => resp.json())
                 .then((data) => {
                     setProject(data)
+                    setServices(data.services)
                 })
                 .catch(err => console.log(err))
         }, 3000)
@@ -62,7 +65,7 @@ function Project() {
     function createService(project) {
         setMessage('')
         //last service
-        const lastService = project.services[project.services.length -1]
+        const lastService = project.services[project.services.length - 1]
 
         lastService.id = uuidv4()
 
@@ -71,7 +74,7 @@ function Project() {
         const newCost = parseFloat(project.cost) + parseFloat(lastServiceCost)
 
         //maximum value validation
-        if( newCost > parseFloat(project.budget)) {
+        if (newCost > parseFloat(project.budget)) {
             setMessage('Orçamento ultrapassado, verifique o valor do serviço')
             setType('error')
             project.services.pop()
@@ -89,12 +92,14 @@ function Project() {
             },
             body: JSON.stringify(project)
         }).then((resp) => resp.json())
-        .then((data) => {
-            //exibir os services
-            console.log(data)
-        })
-        .catch(err => console.log(err))
+            .then((data) => {
+                //exibir os services
+                setShowServiceForm(false)
+            })
+            .catch(err => console.log(err))
     }
+
+    function removeService() {}
 
     function toggleProjectForm() {
         setShowProjectForm(!showProjectForm)
@@ -150,7 +155,22 @@ function Project() {
                         </div>
                         <h2>Serviços</h2>
                         <Container customClass='start'>
-                            <p>Itens de serviços</p>
+                            {services.length > 0 &&
+                                services.map((service) => (
+                                    <ServiceCard 
+                                    id={service.id}
+                                    name={service.name}
+                                    cost={service.cost}
+                                    description={service.description}
+                                    key={service.id}
+                                    handleRemove={removeService}
+                                    />
+                                ))
+                            }
+                            {
+                                services.length === 0 &&
+                                <p>Não há serviços cadastrados</p>
+                            }
                         </Container>
                     </Container>
                 </div>
