@@ -1,4 +1,4 @@
-import { parse, v4 as uuidv4 } from 'uuid'
+import { v4 as uuidv4 } from 'uuid'
 import React, { useState, useEffect } from 'react'
 import './Project.css'
 import Loading from '../layout/Loading'
@@ -101,7 +101,7 @@ function Project() {
 
     function removeService(id, cost) {
         setMessage('')
-        
+
         const servicesUpdate = project.services.filter(
             (service) => service.id !== id
         )
